@@ -1,0 +1,11 @@
+{
+  "AppSyncApiName": "reactmytodos",
+  "DynamoDBBillingMode": "PAY_PER_REQUEST",
+  "DynamoDBEnableServerSideEncryption": false,
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authreactmytodos4440dba5",
+      "Outputs.UserPoolId"
+    ]
+  }
+}

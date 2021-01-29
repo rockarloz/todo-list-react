@@ -1,0 +1,21 @@
+{
+    "appName": "reactmytodos",
+    "roleName": "pinpointLambdaRole1e373a30",
+    "cloudformationPolicyName": "cloudformationPolicy1e373a30",
+    "cloudWatchPolicyName": "cloudWatchPolicy1e373a30",
+    "pinpointPolicyName": "pinpointPolicy1e373a30",
+    "authPolicyName": "pinpoint_amplify_1e373a30",
+    "unauthPolicyName": "pinpoint_amplify_1e373a30",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    }
+}

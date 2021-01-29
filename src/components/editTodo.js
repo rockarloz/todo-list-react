@@ -9,6 +9,13 @@ import { MuiPickersUtilsProvider, DateTimePicker } from "@material-ui/pickers";
 import S3ImageUpload from "./S3ImageUpload.js";
 import { useHistory } from "react-router-dom";
 
+import { Auth } from 'aws-amplify'
+import { API, graphqlOperation } from 'aws-amplify';
+import { getTodo } from '../graphql/queries';
+import { updateTodo } from '../graphql/mutations';
+import awsconfig from '../aws-exports';
+API.configure(awsconfig);
+
 const useStyles = makeStyles(theme => ({
   textField: {
     marginTop: theme.spacing(1),
@@ -33,24 +40,45 @@ function EditTodo(props) {
   const [mySubmitting, setMySubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [item, setItem] = useState({ id: "", username: "", description: "", dateAt: "", image: null });
+  const [user, setUser] = useState({});
   let history = useHistory();
 
   const fetchItem = useCallback(async () => {
-    setItem({ id: "", username: "", description: "", dateAt: "", image: null });
+    try {
+      const data = await Auth.currentUserPoolUser();
+      const userInfo = { username: data.username, ...data.attributes, };
+      setUser(userInfo);
+      const response = await API.graphql(graphqlOperation(getTodo, {
+          id: props.match.params.idTodo
+      }));
+      setSelectedDate(new Date(response.data.getTodo.dateAt));
+      setItem({ id:response.data.getTodo.id, username: response.data.getTodo.username, description: response.data.getTodo.description, image: response.data.getTodo.image });
+    } catch (err) { console.log('error: ', err) }
     console.log(props.match.params.idTodo);
   }, [props.match.params.idTodo]);
-  
+
   useEffect(() => {
     fetchItem();
-  }, [fetchItem]); 
+  }, [fetchItem]);
 
   const handleDateChange = date => {
     setSelectedDate(date);
   };
 
   async function callEditTodo(item) {  
-    history.push("/");
+    try {
+      await API.graphql(graphqlOperation(updateTodo, { input: item }))
+      console.log('todo successfully updated!')
+      history.push("/")
+    } catch (err) {
+      console.log("error: ", err)
+    }
   }
+
+  const handleLoadImage = event => {
+    console.log("Handle onLoadImage: ", event);
+    setItem({ id: item.id, username: user.username, description: item.description, dateAt: item.dateAt, image: event });
+  };
 
   return (
     <div className="EditTodo">
@@ -58,12 +86,13 @@ function EditTodo(props) {
         Edit Todo
       </Typography>
       <Formik
+        enableReinitialize
         initialValues={{ description: item.description }}
         validationSchema={validationSchema}
         onSubmit={(values, { resetForm }) => {
           console.log(values);
           console.log(selectedDate.getTime());
-          callEditTodo({})
+          callEditTodo({ id: item.id, username: user.username, description: values.description, dateAt: selectedDate.getTime(), image: item.image });
           setMySubmitting(true);
           resetForm();
         }}
@@ -107,7 +136,10 @@ function EditTodo(props) {
                 />
               </div>
             </MuiPickersUtilsProvider>
-            <S3ImageUpload />
+            <S3ImageUpload 
+              image={item.image}
+              onLoadImage={handleLoadImage} 
+            />
             <Button
               variant="contained"
               className={classes.button}

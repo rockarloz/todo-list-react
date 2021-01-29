@@ -6,6 +6,13 @@ import AddIcon from "@material-ui/icons/Add";
 
 import ItemTodo from "./itemTodo.js";
 
+import { Auth } from 'aws-amplify'
+import { API, graphqlOperation } from 'aws-amplify';
+import { listTodos } from '../graphql/queries';
+import { deleteTodo } from '../graphql/mutations';
+import awsconfig from '../aws-exports';
+API.configure(awsconfig);
+
 const useStyles = makeStyles(theme => ({
   margin: {
     margin: theme.spacing(1)
@@ -35,16 +42,38 @@ function IndexTodos() {
   const [items, setItems] = useState([]);
 
   const fetchItems = async () => {
-    const data = await fetch("todos.json");
-    const items = await data.json();
-    setItems(items);
-    console.log(items);
+    try {
+      const data = await Auth.currentUserPoolUser();
+      const userInfo = { username: data.username, ...data.attributes, };
+      const response = await API.graphql(graphqlOperation(listTodos, {
+          limit: 100,
+          filter: {
+              username: {
+                  eq: userInfo.username
+              }
+          }
+      }));
+      console.log(response.data.listTodos.items);
+      setItems(response.data.listTodos.items);
+    } catch (err) { console.log('error: ', err) }
   };
 
   const handleDelete = event => {
     console.log("onDelete Item");
     console.log(event);
+    callDeleteTodo(event);
   };
+
+  async function callDeleteTodo(item) {  
+    try {
+      await API.graphql(graphqlOperation(deleteTodo, { input: { id: item.id } }));
+      console.log('todo successfully deleted!');
+      const new_items = items.filter(myitem => myitem.id !== item.id);
+      setItems(new_items);
+    } catch (err) {
+      console.log("error: ", err)
+    }
+  }
 
   return (
     <div className="IndexTodos">

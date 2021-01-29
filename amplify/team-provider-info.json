@@ -1,0 +1,20 @@
+{
+  "prod": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-reactmytodos-prod-164048-authRole",
+      "UnauthRoleArn": "arn:aws:iam::704445629556:role/amplify-reactmytodos-prod-164048-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::704445629556:role/amplify-reactmytodos-prod-164048-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-reactmytodos-prod-164048-deployment",
+      "UnauthRoleName": "amplify-reactmytodos-prod-164048-unauthRole",
+      "StackName": "amplify-reactmytodos-prod-164048",
+      "StackId": "arn:aws:cloudformation:us-east-1:704445629556:stack/amplify-reactmytodos-prod-164048/bf14a8c0-6250-11eb-bb78-0a9564c9a859",
+      "AmplifyAppId": "d103d0hhu1dbv8"
+    },
+    "categories": {
+      "auth": {
+        "reactmytodos4440dba5": {}
+      }
+    }
+  }
+}
